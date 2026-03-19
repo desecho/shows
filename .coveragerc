@@ -1,0 +1,24 @@
+[run]
+branch = True
+omit =
+    src/showsapp/tests/*
+    src/showsapp/migrations/*
+    src/manage.py
+    src/shows/wsgi.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self\.debug
+    raise AssertionError
+    raise NotImplementedError
+
+ignore_errors = True
+show_missing = True
+
+omit =
+    src/showsapp/tests/*
+    src/showsapp/migrations/*
+    src/manage.py
+    src/shows/wsgi.py

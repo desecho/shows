@@ -1,0 +1,7 @@
+src/showsapp/static
+venv
+node_modules
+.tox
+.github
+.vscode
+static

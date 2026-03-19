@@ -1,0 +1,26 @@
+[
+  {
+    "fields": {
+      "key_name": "watched",
+      "name": "Watched"
+    },
+    "model": "showsapp.list",
+    "pk": 1
+  },
+  {
+    "fields": {
+      "key_name": "watching",
+      "name": "Watching"
+    },
+    "model": "showsapp.list",
+    "pk": 2
+  },
+  {
+    "fields": {
+      "key_name": "to-watch",
+      "name": "To Watch"
+    },
+    "model": "showsapp.list",
+    "pk": 3
+  }
+]

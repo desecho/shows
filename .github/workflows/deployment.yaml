@@ -1,0 +1,192 @@
+---
+name: Deployment
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  test:
+    name: Test
+    uses: ./.github/workflows/reusable_test.yaml
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: test
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    env:
+      VITE_GOOGLE_ANALYTICS_ID: ""
+      VITE_BACKEND_URL: https://api.shows.samarchyan.me/
+      VITE_ADMIN_EMAIL: desecho@gmail.com
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2.0.0
+
+      - name: Login to GitHub registry
+        uses: docker/login-action@v2.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Build and push docker image
+        uses: docker/build-push-action@v3.1.1
+        with:
+          push: true
+          tags: ghcr.io/${{ github.repository }}-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push docker frontend image
+        uses: docker/build-push-action@v6.15.0
+        with:
+          context: ./frontend
+          build-args: |
+            VITE_GOOGLE_ANALYTICS_ID=${{ env.VITE_GOOGLE_ANALYTICS_ID }}
+            VITE_BACKEND_URL=${{ env.VITE_BACKEND_URL }}
+            VITE_ADMIN_EMAIL=${{ env.VITE_ADMIN_EMAIL }}
+          push: true
+          tags: ghcr.io/${{ github.repository }}-frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+  upload_files:
+    name: Upload files
+    runs-on: ubuntu-latest
+    needs: build
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    env:
+      SPACE_NAME: cdn.shows.samarchyan.me
+      SPACE_REGION: tor1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3.0.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v4.2.0
+        with:
+          python-version: "3.13"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3.5.0
+        with:
+          node-version: 18.x
+          registry-url: https://registry.npmjs.org
+
+      - name: Use npm cache
+        uses: actions/cache@v4.2.3
+        with:
+          path: ~/.npm
+          key: npm
+
+      - name: Install yarn
+        run: sudo npm install yarn -g
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn cache dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Use yarn cache
+        uses: actions/cache@v4.2.3
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: yarn-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            yarn-
+
+      - name: Use pip cache
+        uses: actions/cache@v4.2.3
+        with:
+          path: ~/.cache/pip
+          key: pip
+
+      # Need to use this because yarn cache is not working properly
+      - name: Use node_modules cache
+        uses: actions/cache@v4.2.3
+        with:
+          path: node_modules
+          key: node_modules-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            node_modules-
+
+      - name: Use venv cache
+        uses: actions/cache@v4.2.3
+        with:
+          path: venv
+          key: venv-${{ hashFiles('requirements.txt', 'requirements-dev.txt', 'requirements-additional.txt') }}
+
+      - name: Install uv
+        run: pip3 install uv
+
+      # This is needed to avoid errors when running collectstatic command
+      - name: Create env files
+        run: make create-env-files
+
+      - name: Create venv
+        run: make create-venv
+
+      - name: Collect static files
+        run: make collectstatic
+
+      - name: Upload static files
+        uses: BetaHuhn/do-spaces-action@v2.0.74
+        with:
+          access_key: ${{ secrets.SPACES_ACCESS_KEY }}
+          secret_key: ${{ secrets.SPACES_SECRET_KEY }}
+          space_name: ${{ env.SPACE_NAME }}
+          space_region: ${{ env.SPACE_REGION }}
+          source: static
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2.5.1
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          version: "1.135.0"
+
+      - name: Flush CDN cache
+        run: make flush-cdn-cache
+  restart_app:
+    name: Restart app
+    uses: ./.github/workflows/reusable_restart_app.yaml
+    needs: upload_files
+    secrets: inherit
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+  migrate_db:
+    name: Migrate DB
+    runs-on: ubuntu-latest
+    needs: restart_app
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3.0.2
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2.5.1
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          version: "1.135.0"
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3.0
+
+      - name: Configure kubectl
+        run: |
+          mkdir ~/.kube
+          echo "$KUBECONFIG" > ~/.kube/config
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG }} # Done as a variable because it doesn't work in place.
+
+      - name: Run db migration
+        run: make prod-migrate

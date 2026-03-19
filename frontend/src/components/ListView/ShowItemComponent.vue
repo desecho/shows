@@ -1,0 +1,1160 @@
+<template>
+  <div
+    class="show"
+    :class="{
+      'show-minimal': mode == 'minimal',
+      'show-full': mode == 'full',
+      'show-compact': mode == 'compact',
+    }"
+  >
+    <!-- Show title banner spanning full width at the very top -->
+    <div class="show-title-banner">
+      <h2 class="show-title" :title="record.show.titleOriginal">
+        {{ record.show.title }}
+      </h2>
+      <!-- Action buttons in title banner -->
+      <div class="title-action-buttons">
+        <!-- Only show action buttons for own lists -->
+        <div v-if="!isProfileView" class="remove-button">
+          <a href="javascript:void(0)" title="Delete" @click="$emit('remove', record, recordIndex)">
+            <v-icon icon="mdi-trash-can" />
+          </a>
+        </div>
+        <!-- Add to list buttons - show for logged in users viewing profile -->
+        <div v-if="isProfileView && isLoggedIn" class="add-to-my-list-buttons">
+          <v-btn
+            v-if="!isShowInMyList(record.show.id)"
+            size="x-small"
+            color="primary"
+            variant="outlined"
+            class="watched-btn"
+            title="Add to my Watched list"
+            @click="$emit('add-to-my-list', record.show.id, listWatchedId)"
+          >
+            <v-icon icon="mdi-eye" />
+          </v-btn>
+          <v-btn
+            v-if="!isShowInMyList(record.show.id)"
+            size="x-small"
+            color="secondary"
+            variant="outlined"
+            class="to-watch-btn"
+            title="Add to my To Watch list"
+            @click="$emit('add-to-my-list', record.show.id, listToWatchId)"
+          >
+            <v-icon icon="mdi-eye-off" />
+          </v-btn>
+          <span v-if="isShowInMyList(record.show.id)" class="already-in-list">
+            <v-icon icon="mdi-check" color="success" />
+            In your list
+          </span>
+        </div>
+        <div v-if="!isProfileView" class="add-to-list-buttons">
+          <!-- From Watched: move to Watching or To Watch -->
+          <template v-if="currentListId == listWatchedId">
+            <a
+              href="javascript:void(0)"
+              title='Move to "Watching" list'
+              @click="$emit('add-to-list', record.show.id, listWatchingId, record)"
+            >
+              <v-icon icon="mdi-eye-refresh" />
+            </a>
+            <a
+              href="javascript:void(0)"
+              title='Move to "To Watch" list'
+              @click="$emit('add-to-list', record.show.id, listToWatchId, record)"
+            >
+              <v-icon icon="mdi-eye-off" />
+            </a>
+          </template>
+          <!-- From Watching: move to Watched or To Watch -->
+          <template v-if="currentListId == listWatchingId">
+            <a
+              v-show="record.show.isReleased"
+              href="javascript:void(0)"
+              title='Move to "Watched" list'
+              @click="$emit('add-to-list', record.show.id, listWatchedId, record)"
+            >
+              <v-icon icon="mdi-eye-check" />
+            </a>
+            <a
+              href="javascript:void(0)"
+              title='Move to "To Watch" list'
+              @click="$emit('add-to-list', record.show.id, listToWatchId, record)"
+            >
+              <v-icon icon="mdi-eye-off" />
+            </a>
+          </template>
+          <!-- From To Watch: move to Watched or Watching -->
+          <template v-if="currentListId == listToWatchId">
+            <a
+              v-show="record.show.isReleased"
+              href="javascript:void(0)"
+              title='Move to "Watched" list'
+              @click="$emit('add-to-list', record.show.id, listWatchedId, record)"
+            >
+              <v-icon icon="mdi-eye-check" />
+            </a>
+            <a
+              href="javascript:void(0)"
+              title='Move to "Watching" list'
+              @click="$emit('add-to-list', record.show.id, listWatchingId, record)"
+            >
+              <v-icon icon="mdi-eye-refresh" />
+            </a>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <!-- Show card content below title -->
+    <div class="show-card-content" v-show="mode != 'minimal'">
+      <div class="poster">
+        <span v-if="mode == 'full'">
+          <v-lazy-image
+            class="poster-big"
+            :srcset="getSrcSet(record.show.posterNormal, record.show.posterBig)"
+            :src="record.show.posterBig"
+            :title="record.show.titleOriginal"
+            :alt="record.show.title"
+          />
+        </span>
+        <span v-else>
+          <v-lazy-image
+            class="poster-small"
+            :srcset="getSrcSet(record.show.posterSmall, record.show.posterNormal)"
+            :src="record.show.posterNormal"
+            :title="record.show.titleOriginal"
+            :alt="record.show.title"
+          />
+        </span>
+        <!-- Star rating under poster -->
+        <div v-if="currentListId == listWatchedId" class="poster-rating">
+          <star-rating
+            :key="`rating-${record.id}-${record.rating}`"
+            :rating="record.rating"
+            :star-size="starSize"
+            :show-rating="false"
+            :clearable="!isProfileView"
+            :read-only="isProfileView"
+            @update:rating="handleRatingChange($event)"
+          >
+          </star-rating>
+        </div>
+      </div>
+      <div
+        v-show="mode !== 'compact' && mode !== 'minimal'"
+        class="details"
+        :class="{
+          'details-minimal': mode == 'minimal',
+        }"
+      >
+        <div v-show="record.show.imdbRating" class="imdb-rating">
+          <span class="item-desc">IMDb Rating:</span>
+          {{ record.show.imdbRating }} ({{ record.show.imdbRatingConverted }})
+        </div>
+        <div v-show="record.show.isReleased" class="release-date">
+          <span v-show="mode != 'minimal'" class="item-desc">First Air Date:</span>
+          {{ record.show.firstAirDate }}
+        </div>
+        <div v-show="mode == 'full'">
+          <div v-show="record.show.country">
+            <span class="item-desc">Country:</span>
+            {{ record.show.country }}
+          </div>
+          <div v-show="record.show.writer">
+            <span class="item-desc">Writer:</span>
+            {{ record.show.writer }}
+          </div>
+          <div v-show="record.show.genre">
+            <span class="item-desc">Genre:</span>
+            {{ record.show.genre }}
+          </div>
+          <div v-show="record.show.actors">
+            <span class="item-desc">Actors:</span>
+            {{ record.show.actors }}
+          </div>
+          <div v-show="record.show.runtime">
+            <span class="item-desc">Runtime:</span>
+            {{ record.show.runtime }}
+          </div>
+          <div v-show="record.show.overview">
+            <span class="item-desc">Overview:</span>
+            {{ record.show.overview }}
+          </div>
+          <div class="urls">
+            <div v-show="record.show.homepage" class="website-link-container">
+              <a :href="record.show.homepage" target="_blank" class="website-link">
+                <v-icon icon="mdi-web" size="small" class="website-icon" />
+                Website
+                <v-icon icon="mdi-open-in-new" size="x-small" class="external-icon" />
+              </a>
+            </div>
+            <a :href="record.show.imdbUrl" target="_blank"><span class="imdb"></span></a>
+            <a :href="record.show.tmdbUrl" target="_blank"><span class="tmdb"></span></a>
+          </div>
+          <div v-show="record.show.trailers.length">
+            <span class="item-desc">Trailers:</span>
+            <div class="trailers">
+              <a
+                v-for="trailer in record.show.trailers"
+                :key="trailer.name"
+                :href="trailer.url"
+                target="_blank"
+                >{{ trailer.name }}</a
+              >
+            </div>
+          </div>
+          <div v-show="record.providerRecords.length">
+            <span class="item-desc">Stream on:</span>
+            <div>
+              <a
+                v-for="providerRecord in record.providerRecords"
+                :key="providerRecord.provider.name"
+                :href="providerRecord.tmdbWatchUrl"
+                target="_blank"
+              >
+                <v-lazy-image
+                  class="provider"
+                  :src="providerRecord.provider.logo"
+                  :title="providerRecord.provider.name"
+                  :alt="providerRecord.provider.name"
+                />
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="review"
+        :class="{
+          'review-minimal': mode == 'minimal',
+        }"
+      >
+        <div v-if="currentListId == listWatchedId">
+          <!-- Only show comment editing for own lists -->
+          <div
+            v-if="!isProfileView"
+            v-show="(record.comment || record.commentArea) && mode != 'minimal'"
+            class="comment"
+          >
+            <div>
+              <v-textarea
+                :model-value="record.comment"
+                class="form-control"
+                title="Comment"
+                @update:model-value="updateComment($event)"
+              > </v-textarea>
+            </div>
+            <button type="button" class="btn btn-secondary" title="Save" @click="$emit('save-comment', record)">
+              <v-icon icon="mdi-content-save" />
+            </button>
+          </div>
+          <!-- Show comments read-only for profile views -->
+          <div v-if="isProfileView && record.comment && mode != 'minimal'" class="comment-readonly">
+            <p>{{ record.comment }}</p>
+          </div>
+          <button
+            v-if="!isProfileView"
+            v-show="record.comment == '' && !record.commentArea && mode != 'minimal'"
+            type="button"
+            class="btn btn-secondary"
+            title="Add comment"
+            @click="$emit('show-comment-area', record)"
+          >
+            <v-icon icon="mdi-comment" />
+          </button>
+          <!-- Share button - hidden on profile pages; show for watched shows with rating or comment -->
+          <div v-if="!isProfileView && mode != 'minimal'" class="share-button-container">
+            <ShareButton :record="record" />
+          </div>
+          <div></div>
+        </div>
+        <div class="clearfix"></div>
+      </div>
+    </div>
+    <!-- Close show-card-content -->
+  </div>
+</template>
+
+<script lang="ts" setup>
+import VLazyImage from "v-lazy-image";
+import { computed } from "vue";
+import StarRating from "vue-star-rating";
+
+import type { RecordType } from "../../types";
+import type { ListContextProps, ViewMode, ViewModeProps } from "../../types/listView";
+
+import { listToWatchId, listWatchedId, listWatchingId, starSizeMinimal, starSizeNormal } from "../../const";
+import { getSrcSet } from "../../helpers";
+import ShareButton from "../ShareButton.vue";
+
+interface Props extends ListContextProps, ViewModeProps {
+  record: RecordType;
+  recordIndex: number;
+  isLoggedIn: boolean;
+  myRecords?: RecordType[];
+}
+
+const props = defineProps<Props>();
+
+const emit = defineEmits<{
+  "remove": [record: RecordType, index: number];
+  "add-to-my-list": [showId: number, listId: number];
+  "add-to-list": [showId: number, listId: number, record: RecordType];
+  "rating-changed": [record: RecordType, rating: number];
+  "save-comment": [record: RecordType];
+  "show-comment-area": [record: RecordType];
+  "update-comment": [record: RecordType, comment: string];
+}>();
+
+const starSize = computed(() => {
+  // Use smaller stars for minimal and compact modes to fit the narrow poster width
+  if (props.mode === "minimal" || props.mode === "compact") {
+    return starSizeMinimal;
+  }
+  return starSizeNormal;
+});
+
+// Check if a show is already in user's list
+function isShowInMyList(showId: number): boolean {
+  if (!props.isProfileView || !props.isLoggedIn || !props.myRecords?.length) {
+    return false;
+  }
+  return props.myRecords.some((record) => record.show.id === showId);
+}
+
+function updateComment(comment: string): void {
+  emit("update-comment", props.record, comment);
+}
+
+function handleRatingChange(rating: number): void {
+  emit("rating-changed", props.record, rating);
+}
+</script>
+
+<style scoped>
+.show {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+  padding: 24px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    border-color: rgba(102, 126, 234, 0.2);
+  }
+
+  .show-content {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.show-minimal {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  margin: 12px 0;
+  padding: 16px 20px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  min-height: auto;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  &::before {
+    height: 2px;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .show-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    min-width: 0;
+  }
+
+  .show-header {
+    flex: 1;
+    align-items: center;
+    margin-bottom: 0;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .title {
+    font-size: 1.1rem;
+    margin-right: 16px;
+  }
+
+  .action-buttons {
+    gap: 12px;
+    flex-shrink: 0;
+  }
+}
+
+.show-full {
+  min-height: 350px;
+  padding: 22px;
+}
+
+/* Compact mode: center poster and align stars under it */
+.show-compact {
+  padding: 20px;
+
+  .show-card-content {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .poster {
+    width: 92px; /* match .poster-small width */
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .poster-rating {
+    width: 100%;
+  }
+}
+
+/* Enhanced show header layout */
+.show-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 16px;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Enhanced typography and content styling */
+.show-title-banner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 24px;
+  margin: -24px -24px 0 -24px;
+  border-radius: 16px 16px 0 0;
+  position: relative;
+  width: calc(100% + 48px);
+  margin-bottom: 0;
+  order: -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  }
+}
+
+.title-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+
+  .remove-button a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.1);
+    }
+
+    .v-icon {
+      font-size: 16px;
+    }
+  }
+
+  .add-to-list-buttons {
+    display: flex;
+    gap: 4px;
+
+    a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      cursor: pointer;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: scale(1.1);
+      }
+
+      .v-icon {
+        font-size: 16px;
+      }
+    }
+  }
+
+  .add-to-my-list-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+
+    .v-btn {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      min-width: auto;
+      height: 28px;
+      border-color: rgba(255, 255, 255, 0.3);
+      color: white;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    /* Make the secondary ("To Watch") button clearly visible on the purple banner */
+    & .to-watch-btn {
+      border-color: rgba(255, 255, 255, 0.55) !important;
+      color: #ffffff !important;
+    }
+
+    & .to-watch-btn .v-icon {
+      color: #ffffff !important;
+      opacity: 1 !important;
+    }
+
+    /* Match the "Watched" button style to the same white treatment */
+    & .watched-btn {
+      border-color: rgba(255, 255, 255, 0.55) !important;
+      color: #ffffff !important;
+    }
+
+    & .watched-btn .v-icon {
+      color: #ffffff !important;
+      opacity: 1 !important;
+    }
+
+    .already-in-list {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      font-size: 0.7rem;
+      color: white;
+      padding: 2px 6px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+  }
+}
+
+.show-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: white;
+  line-height: 1.3;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: -0.025em;
+
+  &:hover {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+  }
+}
+
+.show-card-content {
+  background: white;
+  border-radius: 0 0 16px 16px;
+  padding: 24px;
+  margin: -24px -24px -24px -24px;
+  margin-top: 0;
+  position: relative;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  width: calc(100% + 48px);
+}
+
+/* iPad and tablet breakpoint - prevent horizontal overflow */
+@media (max-width: 1024px) {
+  .show-card-content {
+    width: 100%;
+    margin: -24px -24px -24px -24px;
+    margin-top: 0;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .show-card-content {
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+  }
+}
+
+.item-desc {
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 0.875rem;
+  margin-right: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.details {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  flex: 2;
+  min-width: 600px;
+
+  > div {
+    font-size: 0.95rem;
+    color: #4a5568;
+    line-height: 1.5;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+/* iPad and tablet breakpoint - fix horizontal cutting */
+@media (max-width: 1024px) {
+  .details {
+    min-width: auto;
+    flex: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .details {
+    width: 100%;
+    padding: 12px;
+    min-width: auto;
+    flex: 1;
+  }
+}
+
+.details-minimal {
+  background: transparent;
+  padding: 0;
+  margin-top: 0;
+  border: none;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-shrink: 0;
+
+  .release-date,
+  .imdb-rating {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+  }
+}
+
+.poster {
+  flex-shrink: 0;
+  margin-right: 0;
+  margin-bottom: 0;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+
+  img {
+    border-radius: 12px;
+    transition: transform 0.3s ease;
+    width: auto;
+    height: auto;
+    display: block;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+
+    img {
+      transform: scale(1.03);
+    }
+  }
+}
+
+.poster-small {
+  width: 92px;
+}
+
+.poster-big {
+  width: 185px;
+}
+
+/* Poster Rating Styling */
+.poster-rating {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.poster .poster-rating .vue-star-rating {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.comment {
+  margin-top: 16px;
+  width: 100%;
+  max-width: 500px;
+
+  textarea {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 12px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+    transition: border-color 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+  }
+
+  button {
+    margin-top: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+  }
+}
+
+.comment-readonly {
+  background: rgba(248, 250, 252, 0.8);
+  border-left: 4px solid #667eea;
+  border-radius: 0 8px 8px 0;
+  padding: 16px;
+  margin-top: 12px;
+  font-style: italic;
+  color: #4a5568;
+  line-height: 1.6;
+}
+
+.review {
+  padding-top: 16px;
+  width: 670px;
+  max-width: 100%;
+
+  button {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: 8px 4px 8px 0;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(102, 126, 234, 0.2);
+      transform: translateY(-1px);
+    }
+  }
+}
+
+/* iPad and tablet breakpoint - prevent review section overflow */
+@media (max-width: 1024px) {
+  .review {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .review {
+    width: 100%;
+    padding-top: 12px;
+  }
+}
+
+.review-minimal {
+  padding-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+
+  .cancel-on-png,
+  .cancel-off-png,
+  .star-on-png,
+  .star-off-png,
+  .star-half-png {
+    font-size: 1.16em;
+  }
+
+  .vue-star-rating {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+.share-button-container {
+  display: inline-block;
+  margin: 8px 4px 8px 0;
+}
+
+.trailers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+
+  a {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+    }
+  }
+}
+
+.urls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+
+  a {
+    transition: all 0.2s ease;
+    border-radius: 6px;
+    overflow: hidden;
+    display: inline-block;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  .tmdb {
+    background: url("/img/tmdb.svg");
+    background-repeat: no-repeat;
+    width: 70px;
+    height: 50px;
+    display: inline-block;
+    background-size: contain;
+    margin-left: 5px;
+  }
+
+  .imdb {
+    background: url("/img/imdb.png");
+    background-repeat: no-repeat;
+    width: 104px;
+    height: 50px;
+    display: inline-block;
+    background-size: contain;
+  }
+
+  .website-link-container {
+    margin-bottom: 8px;
+  }
+}
+
+.website-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white !important;
+  text-decoration: none !important;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+    color: white !important;
+    text-decoration: none !important;
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  }
+
+  &:focus {
+    outline: 2px solid rgba(102, 126, 234, 0.5);
+    outline-offset: 2px;
+  }
+
+  .website-icon {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .external-icon {
+    color: rgba(255, 255, 255, 0.7);
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .website-link {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    gap: 6px;
+  }
+}
+
+/* Enhanced provider and button styling */
+.provider {
+  width: 50px;
+  height: 50px;
+  margin: 4px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.form-control {
+  width: auto;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .show {
+    flex-direction: column;
+    gap: 16px;
+
+    .poster {
+      align-self: center;
+    }
+
+    .show-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+
+      .action-buttons {
+        align-self: flex-end;
+      }
+    }
+  }
+
+  .show-full {
+    padding: 18px;
+
+    .show-card-content {
+      padding: 18px;
+
+      .poster {
+        align-self: center;
+        margin-bottom: 16px;
+      }
+
+      .details {
+        order: 1;
+      }
+
+      .review {
+        order: 2;
+        align-self: stretch;
+      }
+    }
+
+    .show-title-banner {
+      padding: 16px 18px;
+      margin: -18px -18px 0 -18px;
+      width: calc(100% + 36px);
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+
+      .show-title {
+        font-size: 1.5rem;
+      }
+
+      .title-action-buttons {
+        align-self: flex-end;
+      }
+    }
+  }
+
+  .show-minimal {
+    flex-direction: row;
+    gap: 12px;
+
+    .show-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .show-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+
+      .action-buttons {
+        align-self: flex-start;
+      }
+    }
+
+    .details-minimal {
+      gap: 8px;
+
+      .release-date,
+      .imdb-rating {
+        font-size: 0.75rem;
+        padding: 3px 6px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .show {
+    padding: 16px;
+
+    .poster {
+      align-self: flex-start;
+    }
+  }
+
+  .show-full {
+    padding: 14px;
+
+    .show-card-content {
+      padding: 14px;
+    }
+
+    .show-title-banner {
+      padding: 14px;
+      margin: -14px -14px 0 -14px;
+      width: calc(100% + 28px);
+
+      .show-title {
+        font-size: 1.3rem;
+        line-height: 1.2;
+      }
+
+      .title-action-buttons {
+        gap: 6px;
+
+        .remove-button a,
+        .add-to-list-buttons a {
+          width: 28px;
+          height: 28px;
+
+          .v-icon {
+            font-size: 14px;
+          }
+        }
+      }
+    }
+  }
+
+  .show-minimal {
+    padding: 12px 16px;
+
+    .poster {
+      display: none;
+    }
+  }
+}
+</style>

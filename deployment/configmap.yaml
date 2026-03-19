@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shows
+data:
+  PROJECT_DOMAIN: api.shows.samarchyan.me
+  ADMIN_EMAIL: desecho@gmail.com
+  EMAIL_HOST: smtp.gmail.com
+  EMAIL_HOST_USER: desecho@gmail.com
+  DB_HOST: mysql
+  DB_USER: shows
+  STATIC_URL: https://cdn.shows.samarchyan.me/
+  DJANGO_SETTINGS_MODULE: shows.settings
+  REDIS_URL: redis://redis:6379/
+  FRONTEND_URL: https://shows.samarchyan.me

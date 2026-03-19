@@ -1,0 +1,48 @@
+---
+name: Reusable Restart App
+on:
+  workflow_call:
+jobs:
+  reusable_restart_app:
+    name: Restart app
+    runs-on: ubuntu-latest
+    env:
+      PROJECT: shows
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3.0.2
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3.0
+
+      - name: Configure kubectl
+        run: |
+          mkdir ~/.kube
+          echo "$KUBECONFIG" > ~/.kube/config
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG }} # Done as a variable because it doesn't work in place.
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2.5.1
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          version: "1.135.0"
+
+      - name: Restart app
+        run: |
+          kubectl apply -f deployment/configmap.yaml
+          kubectl create secret generic "$PROJECT" --from-literal=DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+            --from-literal=SECRET_KEY="${{ secrets.SECRET_KEY }}" \
+            --from-literal=TMDB_KEY=${{ secrets.TMDB_KEY }} \
+            --from-literal=OMDB_KEY=${{ secrets.OMDB_KEY }} \
+            --from-literal=SENTRY_DSN=${{ secrets.SENTRY_DSN }} \
+            --from-literal=EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }} \
+            --from-literal=OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+          kubectl apply -f deployment/deployment.yaml
+          kubectl apply -f deployment/ingress_backend.yaml
+          kubectl apply -f deployment/ingress_frontend.yaml
+          kubectl apply -f deployment/service_backend.yaml
+          kubectl apply -f deployment/service_frontend.yaml
+          kubectl rollout restart "deployment/$PROJECT"
+          kubectl rollout status "deployment/$PROJECT"
