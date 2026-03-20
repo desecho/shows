@@ -8,6 +8,10 @@ export const listToWatchId = 3;
 export const starSizeNormal = 35;
 export const starSizeMinimal = 15;
 
+// Stats page expandable sections
+export const STATS_DEFAULT_VISIBLE = 5;
+export const STATS_EXPANDED_VISIBLE = 50;
+
 // AI Recommendations constants
 export const AI_MAX_RECOMMENDATIONS = 50;
 export const AI_MIN_RECOMMENDATIONS = 1;

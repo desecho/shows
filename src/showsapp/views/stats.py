@@ -109,8 +109,8 @@ class StatsView(APIView):
         genre_counts = self._count_comma_separated_field(watched_records, "genre")
         actor_counts = self._count_comma_separated_field(watched_records, "actors")
 
-        top_genres = sorted(genre_counts.items(), key=lambda x: x[1], reverse=True)[:5]
-        top_actors = sorted(actor_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+        top_genres = sorted(genre_counts.items(), key=lambda x: x[1], reverse=True)[:50]
+        top_actors = sorted(actor_counts.items(), key=lambda x: x[1], reverse=True)[:50]
 
         return {
             "topGenres": [{"name": name, "count": count} for name, count in top_genres],

@@ -219,7 +219,7 @@
                     <p class="text-muted">No genre data available</p>
                   </div>
                   <div v-else>
-                    <div v-for="genre in stats.topGenres" :key="genre.name" class="genre-item">
+                    <div v-for="genre in displayedGenres" :key="genre.name" class="genre-item">
                       <div class="d-flex justify-space-between align-center mb-2">
                         <span>{{ genre.name }}</span>
                         <v-chip size="small" color="success">{{ genre.count }}</v-chip>
@@ -231,6 +231,15 @@
                         class="mb-3"
                       ></v-progress-linear>
                     </div>
+                    <v-btn
+                      v-if="stats.topGenres.length > STATS_DEFAULT_VISIBLE"
+                      variant="text"
+                      size="small"
+                      block
+                      @click="showAllGenres = !showAllGenres"
+                    >
+                      {{ showAllGenres ? "Show less" : "Show more" }}
+                    </v-btn>
                   </div>
                 </v-card-text>
               </v-card>
@@ -248,7 +257,7 @@
                     <p class="text-muted">No actor data available</p>
                   </div>
                   <div v-else>
-                    <div v-for="actor in stats.topActors" :key="actor.name" class="actor-item">
+                    <div v-for="actor in displayedActors" :key="actor.name" class="actor-item">
                       <div class="d-flex justify-space-between align-center mb-2">
                         <span>{{ actor.name }}</span>
                         <v-chip size="small" color="error">{{ actor.count }}</v-chip>
@@ -260,6 +269,15 @@
                         class="mb-3"
                       ></v-progress-linear>
                     </div>
+                    <v-btn
+                      v-if="stats.topActors.length > STATS_DEFAULT_VISIBLE"
+                      variant="text"
+                      size="small"
+                      block
+                      @click="showAllActors = !showAllActors"
+                    >
+                      {{ showAllActors ? "Show less" : "Show more" }}
+                    </v-btn>
                   </div>
                 </v-card-text>
               </v-card>
@@ -439,12 +457,13 @@
 
 <script lang="ts" setup>
 import axios from "axios";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 import ErrorBoundary from "../components/ErrorBoundary.vue";
 import LoadingIndicator from "../components/LoadingIndicator.vue";
 import YearSelectorComponent from "../components/YearSelectorComponent.vue";
 import { useApiCall } from "../composables/useAsyncOperation";
+import { STATS_DEFAULT_VISIBLE, STATS_EXPANDED_VISIBLE } from "../const";
 import { getUrl } from "../helpers";
 
 interface TopItem {
@@ -558,6 +577,17 @@ const stats = ref<Stats>({
   },
   availableYears: [],
 });
+
+const showAllGenres = ref(false);
+const showAllActors = ref(false);
+
+const displayedGenres = computed(() =>
+  stats.value.topGenres.slice(0, showAllGenres.value ? STATS_EXPANDED_VISIBLE : STATS_DEFAULT_VISIBLE),
+);
+
+const displayedActors = computed(() =>
+  stats.value.topActors.slice(0, showAllActors.value ? STATS_EXPANDED_VISIBLE : STATS_DEFAULT_VISIBLE),
+);
 
 async function loadStats(year?: number | null): Promise<void> {
   const url = year ? `stats/?year=${year}` : "stats/";

@@ -137,7 +137,12 @@ class Command(BaseCommand):
                     watch_data,
                 )
                 self._filter_out_already_existing_provider_records(
-                    cast(list[ProviderRecordType], list(existing_provider_records.values("provider_id", "country"))),
+                    cast(
+                        list[ProviderRecordType],
+                        list(
+                            existing_provider_records.values("provider_id", "country")
+                        ),
+                    ),
                     watch_data,
                 )
                 try:
