@@ -11,7 +11,6 @@ export interface ShowStructuredData {
     cast?: string[];
     plot?: string;
     poster?: string;
-    runtime?: number;
     datePublished?: string;
     contentRating?: string;
 }
@@ -47,7 +46,6 @@ export function useShowStructuredData(show: MaybeRef<ShowStructuredData>): {
             ...(s.plot && { description: s.plot }),
             ...(s.year && { dateCreated: s.year.toString() }),
             ...(s.datePublished && { datePublished: s.datePublished }),
-            ...(s.runtime && { duration: `PT${s.runtime}M` }),
             ...(s.contentRating && { contentRating: s.contentRating }),
             ...(s.poster && {
                 image: {

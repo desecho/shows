@@ -67,17 +67,6 @@
 
                 <v-col cols="12" sm="6" md="3">
                   <div class="yearly-stat-item">
-                    <v-icon size="40" color="info" class="mb-2">mdi-clock</v-icon>
-                    <h3 class="text-h4 font-weight-bold">{{ stats.yearlyOverview.totalHoursWatched }}</h3>
-                    <p class="text-body-2">Hours Watched</p>
-                    <p class="text-caption text-muted">
-                      {{ Math.round((stats.yearlyOverview.totalHoursWatched / 24) * 10) / 10 }} days of content
-                    </p>
-                  </div>
-                </v-col>
-
-                <v-col cols="12" sm="6" md="3">
-                  <div class="yearly-stat-item">
                     <v-icon size="40" color="warning" class="mb-2">mdi-chart-line</v-icon>
                     <h3 class="text-h4 font-weight-bold">{{ getMonthName(stats.yearlyOverview.peakMonth) }}</h3>
                     <p class="text-body-2">Peak Month</p>
@@ -516,7 +505,6 @@ interface MonthlyTrend {
 
 interface YearlyOverview {
   totalShowsWatched: number;
-  totalHoursWatched: number;
   yearOverYearChange: number;
   yearOverYearChangePercent: number;
   peakMonth: number;
@@ -528,7 +516,6 @@ interface ShowMilestone {
   title: string;
   date?: string;
   rating?: number;
-  runtime?: string;
 }
 
 interface TopItemMilestone {
@@ -566,7 +553,6 @@ interface Stats {
   totalShowsWatched: number;
   totalShowsWatching: number;
   totalShowsToWatch: number;
-  totalHoursWatched: number;
   averageRating: number | null;
   totalRatedShows: number;
   topGenres: TopItem[];
@@ -596,7 +582,6 @@ const stats = ref<Stats>({
   totalShowsWatched: 0,
   totalShowsWatching: 0,
   totalShowsToWatch: 0,
-  totalHoursWatched: 0,
   averageRating: null,
   totalRatedShows: 0,
   topGenres: [],

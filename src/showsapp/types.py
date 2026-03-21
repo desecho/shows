@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, time
+from datetime import date
 from typing import Any, Literal, Optional, TypeAlias
 
 from django.urls import URLPattern, URLResolver
@@ -85,7 +85,6 @@ class TmdbShowProcessed(TypedDict):
     trailers: list[TmdbTrailer]
     title: str
     overview: Optional[str]
-    runtime: Optional[time]
 
 
 class OmdbShowProcessed(TypedDict):

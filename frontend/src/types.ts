@@ -45,7 +45,6 @@ export interface Show {
     actors: string;
     overview: string;
     homepage: string;
-    runtime: string;
     imdbUrl: string;
     tmdbUrl: string;
     trailers: Trailer[];

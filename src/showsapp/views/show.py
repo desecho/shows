@@ -1,6 +1,6 @@
 """Show detail views."""
 
-from datetime import datetime, time
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, List, Optional, cast
 from urllib.parse import urljoin
 
@@ -84,7 +84,6 @@ class ShowDetailView(APIView):
             "actors": show.actors,
             "overview": show.overview,
             "homepage": show.homepage,
-            "runtime": show.runtime_formatted,
             "imdbUrl": show.imdb_url,
             "tmdbUrl": show.tmdb_url,
             "trailers": show.get_trailers(),
@@ -148,10 +147,6 @@ class ShowDetailView(APIView):
                 next_year = datetime.now() + relativedelta(years=1)
                 first_air_date_timestamp = next_year.timestamp()
 
-            runtime_formatted = None
-            if tmdb_data["runtime"]:
-                runtime_formatted = tmdb_data["runtime"].strftime("%H:%M")
-
             poster_small = get_poster_url("small", tmdb_data["poster"])
             poster_normal = get_poster_url("normal", tmdb_data["poster"])
             poster_big = get_poster_url("big", tmdb_data["poster"])
@@ -176,7 +171,6 @@ class ShowDetailView(APIView):
                 "actors": actors,
                 "overview": tmdb_data["overview"],
                 "homepage": tmdb_data["homepage"],
-                "runtime": runtime_formatted,
                 "imdbUrl": imdb_url,
                 "tmdbUrl": tmdb_url,
                 "trailers": self._convert_tmdb_trailers_to_trailers(

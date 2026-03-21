@@ -161,7 +161,6 @@ class Show(Model):
     imdb_rating = DecimalField(max_digits=2, decimal_places=1, null=True)
     poster = CharField(max_length=255, null=True)
     first_air_date = DateField(null=True)
-    runtime = TimeField(null=True, blank=True)
     homepage = URLField(null=True, blank=True)
     trailers = JSONField(null=True, blank=True)
     watch_data_update_date = DateTimeField(null=True, blank=True)
@@ -196,13 +195,6 @@ class Show(Model):
         """Get IMDb rating float."""
         if self.imdb_rating:
             return float(self.imdb_rating)
-        return None
-
-    @property
-    def runtime_formatted(self) -> Optional[str]:
-        """Return runtime formatted."""
-        if self.runtime:
-            return self.runtime.strftime("%H:%M")
         return None
 
     @property

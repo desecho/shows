@@ -23,7 +23,6 @@ export interface ShowSEO {
     cast?: string[];
     plot?: string;
     poster?: string;
-    runtime?: number;
 }
 
 export interface UserProfileSEO {

@@ -1,7 +1,7 @@
 """TMDB."""
 
 from collections import abc
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime
 from typing import Optional, cast
 from urllib.parse import urljoin
 
@@ -180,12 +180,6 @@ def _get_show_data(tmdb_show: tmdb.TV, lang: str) -> TmdbShow:
     return show
 
 
-def _get_time_from_min(minutes: Optional[int]) -> Optional[time]:
-    if minutes:
-        return (datetime(1900, 1, 1) + timedelta(minutes=minutes)).time()
-    return None
-
-
 def get_tmdb_show_data(tmdb_id: int) -> TmdbShowProcessed:
     """Get TMDB show data."""
     tmdb_show = tmdb.TV(tmdb_id)
@@ -199,10 +193,6 @@ def get_tmdb_show_data(tmdb_id: int) -> TmdbShowProcessed:
 
     first_air_date = _get_date(show_info_en.get("first_air_date"))
 
-    # Get runtime from episode_run_time (average)
-    episode_run_times = show_info_en.get("episode_run_time", [])
-    avg_runtime = episode_run_times[0] if episode_run_times else None
-
     return {
         "tmdb_id": tmdb_id,
         "imdb_id": imdb_id,
@@ -215,7 +205,6 @@ def get_tmdb_show_data(tmdb_id: int) -> TmdbShowProcessed:
         "trailers": _get_trailers(tmdb_show, lang=settings.LANGUAGE_EN),
         "title": show_info_en.get("name", ""),
         "overview": show_info_en.get("overview"),
-        "runtime": _get_time_from_min(avg_runtime),
     }
 
 

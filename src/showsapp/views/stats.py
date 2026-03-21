@@ -78,24 +78,13 @@ class StatsView(APIView):
     def _get_time_and_rating_stats(
         watched_records: "QuerySet[Record]",
     ) -> Dict[str, Any]:
-        """Get time watched and rating statistics."""
-        total_hours = 0.0
-        for record in watched_records.select_related("show"):
-            if record.show.runtime:
-                runtime_seconds = (
-                    record.show.runtime.hour * 3600
-                    + record.show.runtime.minute * 60
-                    + record.show.runtime.second
-                )
-                total_hours += runtime_seconds / 3600
-
+        """Get rating statistics."""
         rated_shows = watched_records.filter(rating__gt=0)
         rating_stats = rated_shows.aggregate(
             average_rating=Avg("rating"), total_rated=Count("rating")
         )
 
         return {
-            "totalHoursWatched": round(total_hours, 1),
             "averageRating": round(rating_stats["average_rating"], 1)
             if rating_stats["average_rating"]
             else None,
@@ -202,16 +191,6 @@ class StatsView(APIView):
             (year_change / previous_count * 100) if previous_count > 0 else 0
         )
 
-        total_hours = 0.0
-        for record in yearly_records.select_related("show"):
-            if record.show.runtime:
-                runtime_seconds = (
-                    record.show.runtime.hour * 3600
-                    + record.show.runtime.minute * 60
-                    + record.show.runtime.second
-                )
-                total_hours += runtime_seconds / 3600
-
         monthly_distribution = []
         for month in range(1, 13):
             month_count = yearly_records.filter(date__month=month).count()
@@ -225,7 +204,6 @@ class StatsView(APIView):
 
         return {
             "totalShowsWatched": current_count,
-            "totalHoursWatched": round(total_hours, 1),
             "yearOverYearChange": year_change,
             "yearOverYearChangePercent": round(year_change_percent, 1),
             "peakMonth": peak_month["month"],
@@ -245,19 +223,6 @@ class StatsView(APIView):
         highest_rated = (
             yearly_records.filter(rating__gt=0).order_by("-rating", "-date").first()
         )
-
-        longest_show = None
-        max_runtime = 0
-        for record in yearly_records.select_related("show"):
-            if record.show.runtime:
-                runtime_seconds = (
-                    record.show.runtime.hour * 3600
-                    + record.show.runtime.minute * 60
-                    + record.show.runtime.second
-                )
-                if runtime_seconds > max_runtime:
-                    max_runtime = runtime_seconds
-                    longest_show = record
 
         top_genre_data = self._get_top_item_from_field(yearly_records, "genre")
         top_actor_data = self._get_top_item_from_field(yearly_records, "actors")
@@ -286,14 +251,6 @@ class StatsView(APIView):
                     "date": highest_rated.date.strftime("%Y-%m-%d"),
                 }
                 if highest_rated
-                else None
-            ),
-            "longestShow": (
-                {
-                    "title": longest_show.show.title,
-                    "runtime": longest_show.show.runtime_formatted,
-                }
-                if longest_show
                 else None
             ),
             "topGenre": top_genre_data,

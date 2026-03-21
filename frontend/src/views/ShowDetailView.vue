@@ -117,10 +117,6 @@
                 <span class="label">First Air Date:</span>
                 <span class="value">{{ showData.show.firstAirDate }}</span>
               </div>
-              <div v-if="showData.show.runtime" class="metadata-item">
-                <span class="label">Runtime:</span>
-                <span class="value">{{ showData.show.runtime }}</span>
-              </div>
               <div v-if="showData.show.imdbRating" class="metadata-item">
                 <span class="label">IMDb Rating:</span>
                 <span class="value">{{ showData.show.imdbRating }}/10</span>

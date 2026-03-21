@@ -211,7 +211,6 @@ class RecordsView(APIView):
             "actors": show.actors,
             "overview": show.overview,
             "homepage": show.homepage,
-            "runtime": show.runtime_formatted,
             "imdbUrl": show.imdb_url,
             "tmdbUrl": show.tmdb_url,
             "trailers": show.get_trailers(),

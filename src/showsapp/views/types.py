@@ -28,7 +28,6 @@ class ShowObject(TypedDict):
     actors: Optional[str]
     overview: Optional[str]
     homepage: Optional[str]
-    runtime: Optional[str]
     imdbUrl: str
     tmdbUrl: str
     trailers: list[Trailer]
