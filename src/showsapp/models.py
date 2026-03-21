@@ -160,6 +160,7 @@ class Show(Model):
     imdb_rating = DecimalField(max_digits=2, decimal_places=1, null=True)
     poster = CharField(max_length=255, null=True)
     first_air_date = DateField(null=True)
+    status = CharField(max_length=50, null=True, blank=True)
     homepage = URLField(null=True, blank=True)
     trailers = JSONField(null=True, blank=True)
     watch_data_update_date = DateTimeField(null=True, blank=True)

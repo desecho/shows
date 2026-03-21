@@ -205,6 +205,7 @@ def get_tmdb_show_data(tmdb_id: int) -> TmdbShowProcessed:
         "trailers": _get_trailers(tmdb_show, lang=settings.LANGUAGE_EN),
         "title": show_info_en.get("name", ""),
         "overview": show_info_en.get("overview"),
+        "status": show_info_en.get("status"),
     }
 
 

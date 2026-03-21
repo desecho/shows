@@ -27,6 +27,7 @@ class ShowObject(TypedDict):
     genre: Optional[str]
     actors: Optional[str]
     overview: Optional[str]
+    status: Optional[str]
     homepage: Optional[str]
     imdbUrl: str
     tmdbUrl: str

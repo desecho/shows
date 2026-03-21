@@ -210,6 +210,7 @@ class RecordsView(APIView):
             "genre": show.genre,
             "actors": show.actors,
             "overview": show.overview,
+            "status": show.status,
             "homepage": show.homepage,
             "imdbUrl": show.imdb_url,
             "tmdbUrl": show.tmdb_url,

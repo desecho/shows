@@ -44,6 +44,7 @@ export interface Show {
     genre: string;
     actors: string;
     overview: string;
+    status: string;
     homepage: string;
     imdbUrl: string;
     tmdbUrl: string;

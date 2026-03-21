@@ -85,6 +85,7 @@ class TmdbShowProcessed(TypedDict):
     trailers: list[TmdbTrailer]
     title: str
     overview: Optional[str]
+    status: Optional[str]
 
 
 class OmdbShowProcessed(TypedDict):

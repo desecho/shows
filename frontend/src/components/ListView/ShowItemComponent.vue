@@ -174,6 +174,10 @@
             <span class="item-desc">Actors:</span>
             {{ record.show.actors }}
           </div>
+          <div v-show="record.show.status">
+            <span class="item-desc">Status:</span>
+            {{ record.show.status }}
+          </div>
           <div v-show="record.show.overview">
             <span class="item-desc">Overview:</span>
             {{ record.show.overview }}

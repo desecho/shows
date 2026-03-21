@@ -137,6 +137,10 @@
                 <span class="label">Actors:</span>
                 <span class="value">{{ showData.show.actors }}</span>
               </div>
+              <div v-if="showData.show.status" class="metadata-item">
+                <span class="label">Status:</span>
+                <span class="value">{{ showData.show.status }}</span>
+              </div>
             </div>
           </div>
         </div>

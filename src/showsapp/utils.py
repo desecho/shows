@@ -26,6 +26,7 @@ def merge_show_data(
         "trailers": show_data_tmdb["trailers"],
         "title": show_data_tmdb["title"],
         "overview": show_data_tmdb["overview"],
+        "status": show_data_tmdb["status"],
         "writer": show_data_omdb["writer"],
         "actors": show_data_omdb["actors"],
         "genre": show_data_omdb["genre"],
