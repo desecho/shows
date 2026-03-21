@@ -72,6 +72,7 @@ export function createSearchString(record: RecordType): string {
         safeString(record.show.title),
         safeString(record.show.titleOriginal),
         safeString(record.show.actors),
+        safeString(record.show.writer),
     ];
 
     return parts.filter(Boolean).join(" ").toLowerCase();

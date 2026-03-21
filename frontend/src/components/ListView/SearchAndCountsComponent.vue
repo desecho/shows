@@ -8,7 +8,7 @@
         :hide-details="true"
         class="mr-5"
         density="compact"
-        title="You can search by show title or actor"
+        title="You can search by show title, actor, or writer"
         @update:model-value="$emit('update:query', $event)"
       ></v-text-field>
     </v-col>
