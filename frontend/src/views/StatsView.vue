@@ -283,6 +283,44 @@
               </v-card>
             </v-col>
 
+            <!-- Top Writers -->
+            <v-col cols="12" md="6">
+              <v-card class="stat-card">
+                <v-card-title>
+                  <v-icon class="mr-2">mdi-fountain-pen-tip</v-icon>
+                  Top Writers
+                </v-card-title>
+                <v-card-text>
+                  <div v-if="stats.topWriters.length === 0" class="text-center">
+                    <p class="text-muted">No writer data available</p>
+                  </div>
+                  <div v-else>
+                    <div v-for="writer in displayedWriters" :key="writer.name" class="writer-item">
+                      <div class="d-flex justify-space-between align-center mb-2">
+                        <span>{{ writer.name }}</span>
+                        <v-chip size="small" color="warning">{{ writer.count }}</v-chip>
+                      </div>
+                      <v-progress-linear
+                        :model-value="getWriterPercentage(writer.count)"
+                        color="warning"
+                        height="6"
+                        class="mb-3"
+                      ></v-progress-linear>
+                    </div>
+                    <v-btn
+                      v-if="stats.topWriters.length > STATS_DEFAULT_VISIBLE"
+                      variant="text"
+                      size="small"
+                      block
+                      @click="showAllWriters = !showAllWriters"
+                    >
+                      {{ showAllWriters ? "Show less" : "Show more" }}
+                    </v-btn>
+                  </div>
+                </v-card-text>
+              </v-card>
+            </v-col>
+
             <!-- Rating Distribution -->
             <v-col cols="12" md="6">
               <v-card class="stat-card">
@@ -533,6 +571,7 @@ interface Stats {
   totalRatedShows: number;
   topGenres: TopItem[];
   topActors: TopItem[];
+  topWriters: TopItem[];
   monthlyTrends: MonthlyTrend[];
   ratingDistribution: Record<string, number>;
   decadeDistribution: Record<string, number>;
@@ -562,6 +601,7 @@ const stats = ref<Stats>({
   totalRatedShows: 0,
   topGenres: [],
   topActors: [],
+  topWriters: [],
   monthlyTrends: [],
   ratingDistribution: {},
   decadeDistribution: {},
@@ -580,6 +620,7 @@ const stats = ref<Stats>({
 
 const showAllGenres = ref(false);
 const showAllActors = ref(false);
+const showAllWriters = ref(false);
 
 const displayedGenres = computed(() =>
   stats.value.topGenres.slice(0, showAllGenres.value ? STATS_EXPANDED_VISIBLE : STATS_DEFAULT_VISIBLE),
@@ -587,6 +628,10 @@ const displayedGenres = computed(() =>
 
 const displayedActors = computed(() =>
   stats.value.topActors.slice(0, showAllActors.value ? STATS_EXPANDED_VISIBLE : STATS_DEFAULT_VISIBLE),
+);
+
+const displayedWriters = computed(() =>
+  stats.value.topWriters.slice(0, showAllWriters.value ? STATS_EXPANDED_VISIBLE : STATS_DEFAULT_VISIBLE),
 );
 
 async function loadStats(year?: number | null): Promise<void> {
@@ -632,6 +677,11 @@ function getGenrePercentage(count: number): number {
 
 function getActorPercentage(count: number): number {
   const maxCount = stats.value.topActors[0]?.count || 1;
+  return (count / maxCount) * 100;
+}
+
+function getWriterPercentage(count: number): number {
+  const maxCount = stats.value.topWriters[0]?.count || 1;
   return (count / maxCount) * 100;
 }
 
@@ -751,6 +801,7 @@ onMounted(() => {
 .quality-item,
 .genre-item,
 .actor-item,
+.writer-item,
 .rating-item,
 .decade-item,
 .vintage-item {
