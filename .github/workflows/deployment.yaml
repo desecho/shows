@@ -20,7 +20,7 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
     env:
-      VITE_GOOGLE_ANALYTICS_ID: ""
+      VITE_GOOGLE_ANALYTICS_ID: "G-DN7V9477NZ"
       VITE_BACKEND_URL: https://api.shows.samarchyan.me/
       VITE_ADMIN_EMAIL: desecho@gmail.com
     steps:
