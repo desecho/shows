@@ -23,7 +23,6 @@ from django.db.models import (
     PositiveSmallIntegerField,
     QuerySet,
     TextField,
-    TimeField,
     UniqueConstraint,
     URLField,
 )

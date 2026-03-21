@@ -1,6 +1,6 @@
 """Show detail views."""
 
-from datetime import datetime
+from datetime import datetime, time
 from typing import TYPE_CHECKING, Any, List, Optional, cast
 from urllib.parse import urljoin
 
