@@ -14,7 +14,7 @@
           <router-link to="/about">About Shows</router-link>
         </div>
         <div class="footer-copyright">
-          &copy; 2013 - {{ new Date().getFullYear() }} {{ email }}. All rights reserved.
+          &copy; 2026 - {{ new Date().getFullYear() }} {{ email }}. All rights reserved.
         </div>
       </div>
     </div>
