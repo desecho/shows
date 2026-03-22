@@ -38,7 +38,7 @@ dependencies = [
     "Authlib>=1.0.1,<2",
     "pip>=25.2",
     "wget>=3.2,<4",
-    "tmdbsimple>=2.9.1,<3",
+    "tmdbsimple @ git+https://github.com/desecho/tmdbsimple.git@fix_tv_watch_providers",
     "celery[redis]>=5.2.7,<6",
     "tzdata>=2025.2",
 
@@ -73,6 +73,9 @@ dev = [
     "requests-mock",
     "ruff",
 ]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/shows"]
