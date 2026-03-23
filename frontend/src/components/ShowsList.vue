@@ -10,14 +10,14 @@
               title='Add to the list "Watched"'
               @click="addToListFromDb(show, listWatchedId)"
             >
-              <v-icon icon="mdi-eye" />
+              <v-icon icon="mdi-eye-check" />
             </a>
             <a
               href="javascript:void(0)"
               title='Add to the list "Watching"'
               @click="addToListFromDb(show, listWatchingId)"
             >
-              <v-icon icon="mdi-eye-check" />
+              <v-icon icon="mdi-eye-refresh" />
             </a>
             <a
               href="javascript:void(0)"

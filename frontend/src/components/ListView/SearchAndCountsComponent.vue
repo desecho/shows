@@ -17,7 +17,7 @@
       <div class="watch-count-container">
         <div class="watch-count-item watched">
           <div class="count-icon-wrapper watched-icon">
-            <v-icon icon="mdi-eye" />
+            <v-icon icon="mdi-eye-check" />
           </div>
           <div class="count-info">
             <span class="count-number">{{ watchedCount }}</span>
@@ -26,7 +26,7 @@
         </div>
         <div class="watch-count-item watching">
           <div class="count-icon-wrapper watching-icon">
-            <v-icon icon="mdi-eye-check" />
+            <v-icon icon="mdi-eye-refresh" />
           </div>
           <div class="count-info">
             <span class="count-number">{{ watchingCount }}</span>
