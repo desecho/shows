@@ -154,7 +154,7 @@
             <v-col cols="12" sm="6" md="3">
               <v-card class="stat-card text-center">
                 <v-card-text>
-                  <v-icon size="48" color="success" class="mb-3">mdi-eye</v-icon>
+                  <v-icon size="48" color="success" class="mb-3">mdi-eye-check</v-icon>
                   <h2 class="text-h4 font-weight-bold">{{ stats.totalShowsWatched }}</h2>
                   <p class="text-subtitle-1">Shows Watched</p>
                 </v-card-text>
@@ -164,7 +164,7 @@
             <v-col cols="12" sm="6" md="3">
               <v-card class="stat-card text-center">
                 <v-card-text>
-                  <v-icon size="48" color="info" class="mb-3">mdi-eye-check</v-icon>
+                  <v-icon size="48" color="info" class="mb-3">mdi-eye-refresh</v-icon>
                   <h2 class="text-h4 font-weight-bold">{{ stats.totalShowsWatching }}</h2>
                   <p class="text-subtitle-1">Currently Watching</p>
                 </v-card-text>
