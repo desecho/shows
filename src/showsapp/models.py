@@ -61,11 +61,6 @@ class UserBase:
 class User(AbstractUser, UserBase):
     """User class."""
 
-    only_for_friends = BooleanField(
-        verbose_name=_("Only for friends"),
-        default=False,
-        help_text=_("Show my lists only to friends"),
-    )
     hidden = BooleanField(
         verbose_name=_("Hide account"),
         default=False,
@@ -77,7 +72,6 @@ class User(AbstractUser, UserBase):
         default=settings.LANGUAGE_CODE,
         verbose_name=_("Language"),
     )
-    loaded_initial_data = BooleanField(default=False)
     country = CountryField(verbose_name=_("Country"), null=True, blank=True)
     timezone = TimeZoneField(default=settings.TIME_ZONE)
 
