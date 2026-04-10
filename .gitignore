@@ -155,3 +155,9 @@ env_secrets.sh
 db_env_prod.sh
 docker_secrets.env
 .claude
+
+# iOS / Xcode
+ios/**/xcuserdata/
+ios/**/*.xcuserstate
+ios/**/DerivedData/
+ios/**/build/
