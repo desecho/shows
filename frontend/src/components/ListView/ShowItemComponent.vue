@@ -44,13 +44,23 @@
           >
             <v-icon icon="mdi-eye-off" />
           </v-btn>
+          <v-btn
+            v-if="!isShowInMyList(record.show.id)"
+            size="x-small"
+            color="secondary"
+            variant="outlined"
+            title="Add to my On Hold list"
+            @click="$emit('add-to-my-list', record.show.id, listOnHoldId)"
+          >
+            <v-icon icon="mdi-pause-circle" />
+          </v-btn>
           <span v-if="isShowInMyList(record.show.id)" class="already-in-list">
             <v-icon icon="mdi-check" color="success" />
             In your list
           </span>
         </div>
         <div v-if="!isProfileView" class="add-to-list-buttons">
-          <!-- From Watched: move to Watching or To Watch -->
+          <!-- From Watched: move to other lists -->
           <template v-if="currentListId == listWatchedId">
             <a
               href="javascript:void(0)"
@@ -65,6 +75,9 @@
               @click="$emit('add-to-list', record.show.id, listToWatchId, record)"
             >
               <v-icon icon="mdi-eye-off" />
+            </a>
+            <a href="javascript:void(0)" title='Move to "On Hold" list' @click="$emit('add-to-list', record.show.id, listOnHoldId, record)">
+              <v-icon icon="mdi-pause-circle" />
             </a>
           </template>
           <!-- From Watching: move to Watched or To Watch -->
@@ -84,6 +97,9 @@
             >
               <v-icon icon="mdi-eye-off" />
             </a>
+            <a href="javascript:void(0)" title='Move to "On Hold" list' @click="$emit('add-to-list', record.show.id, listOnHoldId, record)">
+              <v-icon icon="mdi-pause-circle" />
+            </a>
           </template>
           <!-- From To Watch: move to Watched or Watching -->
           <template v-if="currentListId == listToWatchId">
@@ -101,6 +117,17 @@
               @click="$emit('add-to-list', record.show.id, listWatchingId, record)"
             >
               <v-icon icon="mdi-eye-refresh" />
+            </a>
+            <a href="javascript:void(0)" title='Move to "On Hold" list' @click="$emit('add-to-list', record.show.id, listOnHoldId, record)">
+              <v-icon icon="mdi-pause-circle" />
+            </a>
+          </template>
+          <template v-if="currentListId == listOnHoldId">
+            <a href="javascript:void(0)" title='Move to "Watching" list' @click="$emit('add-to-list', record.show.id, listWatchingId, record)">
+              <v-icon icon="mdi-eye-refresh" />
+            </a>
+            <a v-show="record.show.isReleased" href="javascript:void(0)" title='Move to "Watched" list' @click="$emit('add-to-list', record.show.id, listWatchedId, record)">
+              <v-icon icon="mdi-eye-check" />
             </a>
           </template>
         </div>
@@ -285,7 +312,7 @@ import StarRating from "vue-star-rating";
 import type { RecordType } from "../../types";
 import type { ListContextProps, ViewMode, ViewModeProps } from "../../types/listView";
 
-import { listToWatchId, listWatchedId, listWatchingId, starSizeMinimal, starSizeNormal } from "../../const";
+import { listOnHoldId, listToWatchId, listWatchedId, listWatchingId, starSizeMinimal, starSizeNormal } from "../../const";
 import { getSrcSet } from "../../helpers";
 import ShareButton from "../ShareButton.vue";
 

@@ -4,6 +4,7 @@ export const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL as string;
 export const listWatchedId = 1;
 export const listWatchingId = 2;
 export const listToWatchId = 3;
+export const listOnHoldId = 4;
 
 export const starSizeNormal = 35;
 export const starSizeMinimal = 15;

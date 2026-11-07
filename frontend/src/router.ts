@@ -4,7 +4,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import type { AuthProps, JWTDecoded } from "./types";
 import type { RouteLocationNormalized } from "vue-router";
 
-import { listToWatchId, listWatchedId, listWatchingId } from "./const";
+import { listOnHoldId, listToWatchId, listWatchedId, listWatchingId } from "./const";
 import { useAuthStore } from "./stores/auth";
 import {
     getQueryParamAsNumber,
@@ -66,6 +66,7 @@ export const router = createRouter({
             component: ListView,
             props: { listId: listToWatchId },
         },
+        { path: "/list/on-hold", component: ListView, props: { listId: listOnHoldId } },
         {
             path: "/users/:username/list/watched",
             component: ListView,
@@ -93,6 +94,7 @@ export const router = createRouter({
                 isProfileView: true,
             }),
         },
+        { path: "/users/:username/list/on-hold", component: ListView, props: (route): Record<string, unknown> => ({ username: route.params.username as string, listId: listOnHoldId, isProfileView: true }) },
         { path: "/login", component: LoginView },
         { path: "/logout", component: LogoutView },
         { path: "/register", component: RegistrationView },

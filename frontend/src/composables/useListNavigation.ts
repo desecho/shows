@@ -1,7 +1,7 @@
 import { computed, type ComputedRef, ref, type Ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
-import { listWatchedId, listWatchingId } from "../const";
+import { listOnHoldId, listWatchedId, listWatchingId } from "../const";
 
 export function useListNavigation(
     initialListId: number,
@@ -53,6 +53,8 @@ export function useListNavigation(
             listSegment = "watched";
         } else if (listId === listWatchingId) {
             listSegment = "watching";
+        } else if (listId === listOnHoldId) {
+            listSegment = "on-hold";
         } else {
             listSegment = "to-watch";
         }

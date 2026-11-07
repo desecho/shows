@@ -126,6 +126,7 @@ class List(Model):
     WATCHED = 1
     WATCHING = 2
     TO_WATCH = 3
+    ON_HOLD = 4
     name = CharField(max_length=255, unique=True)
     key_name = CharField(max_length=255, db_index=True, unique=True)
 
@@ -136,7 +137,7 @@ class List(Model):
     @classmethod
     def is_valid_id(cls, list_id: int) -> bool:
         """Return True if list ID is valid."""
-        return list_id in [cls.WATCHED, cls.WATCHING, cls.TO_WATCH]
+        return list_id in [cls.WATCHED, cls.WATCHING, cls.TO_WATCH, cls.ON_HOLD]
 
 
 class Show(Model):

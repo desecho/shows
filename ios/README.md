@@ -5,7 +5,7 @@ SwiftUI iOS client for the `shows` Django backend.
 ## Features
 
 - JWT login against the existing backend
-- Three synced lists: `Watched`, `Watching`, and `To Watch`
+- Four synced lists: `Watched`, `Watching`, `To Watch`, and `On Hold`
 - Search by show title or actor via the backend TMDB search
 - AI recommendations with genre, year, rating, and count filters
 - Add, move, and remove shows using the existing list endpoints

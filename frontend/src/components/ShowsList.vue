@@ -25,6 +25,9 @@
               @click="addToListFromDb(show, listToWatchId)"
               ><v-icon icon="mdi-eye-off"
             /></a>
+            <a href="javascript:void(0)" title='Add to the list "On Hold"' @click="addToListFromDb(show, listOnHoldId)">
+              <v-icon icon="mdi-pause-circle" />
+            </a>
           </div>
           <a :href="`/show/${show.id}`" target="_blank">
             <v-lazy-image
@@ -53,7 +56,7 @@ import VLazyImage from "v-lazy-image";
 import type { AddToListFromDbResponseData, ShowPreview } from "../types";
 import type { AxiosError } from "axios";
 
-import { listToWatchId, listWatchedId, listWatchingId } from "../const";
+import { listOnHoldId, listToWatchId, listWatchedId, listWatchingId } from "../const";
 import { getSrcSet, getUrl } from "../helpers";
 import { useAuthStore } from "../stores/auth";
 import { useRecordsStore } from "../stores/records";

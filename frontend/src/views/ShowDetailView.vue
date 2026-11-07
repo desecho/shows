@@ -71,6 +71,10 @@
                 <v-icon icon="mdi-eye-off" />
                 Add to To Watch
               </v-btn>
+              <v-btn color="secondary" :disabled="addingToList" class="add-btn" @click="addToList(listOnHoldId)">
+                <v-icon icon="mdi-pause-circle" />
+                Add to On Hold
+              </v-btn>
             </div>
 
             <!-- User's Record Status -->
@@ -232,7 +236,7 @@ import StarRating from "vue-star-rating";
 
 import type { ProviderRecord, RecordType, Show } from "../types";
 
-import { listToWatchId, listWatchedId, listWatchingId } from "../const";
+import { listOnHoldId, listToWatchId, listWatchedId, listWatchingId } from "../const";
 import { getUrl } from "../helpers";
 import { useAuthStore } from "../stores/auth";
 

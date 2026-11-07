@@ -154,6 +154,7 @@ enum ListType: Int, CaseIterable, Identifiable {
     case watched = 1
     case watching = 2
     case toWatch = 3
+    case onHold = 4
 
     var id: Int { rawValue }
 
@@ -165,6 +166,8 @@ enum ListType: Int, CaseIterable, Identifiable {
             return "Watching"
         case .toWatch:
             return "To Watch"
+        case .onHold:
+            return "On Hold"
         }
     }
 
@@ -176,6 +179,8 @@ enum ListType: Int, CaseIterable, Identifiable {
             return "play.circle.fill"
         case .toWatch:
             return "bookmark.fill"
+        case .onHold:
+            return "pause.circle.fill"
         }
     }
 
@@ -187,6 +192,8 @@ enum ListType: Int, CaseIterable, Identifiable {
             return "play.slash"
         case .toWatch:
             return "bookmark.slash"
+        case .onHold:
+            return "pause.circle"
         }
     }
 }

@@ -19,6 +19,7 @@
             <v-btn :value="listWatchedId" :size="modeButtonSize"> Watched </v-btn>
             <v-btn :value="listWatchingId" :size="modeButtonSize"> Watching </v-btn>
             <v-btn :value="listToWatchId" :size="modeButtonSize"> To Watch </v-btn>
+            <v-btn :value="listOnHoldId" :size="modeButtonSize"> On Hold </v-btn>
           </v-btn-toggle>
         </div>
       </div>
@@ -30,7 +31,7 @@
 import { computed } from "vue";
 
 import { useMobile } from "../../composables/mobile";
-import { listToWatchId, listWatchedId, listWatchingId } from "../../const";
+import { listOnHoldId, listToWatchId, listWatchedId, listWatchingId } from "../../const";
 
 interface Props {
   username: string;

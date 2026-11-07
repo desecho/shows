@@ -33,6 +33,11 @@ private struct MainTabView: View {
                     Label("To Watch", systemImage: ListType.toWatch.systemImage)
                 }
 
+            ShowListView(listType: .onHold)
+                .tabItem {
+                    Label("On Hold", systemImage: ListType.onHold.systemImage)
+                }
+
             TrendingView()
                 .tabItem {
                     Label("Trending", systemImage: "flame.fill")
