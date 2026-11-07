@@ -77,7 +77,7 @@ LANGUAGES = (
 LOCALE_PATHS = (join(SRC_DIR, "locale"),)
 
 # Timezone
-TIME_ZONE = "US/Eastern"
+TIME_ZONE = "America/New_York"
 USE_TZ = True
 
 TEMPLATES: list[TemplatesSettings] = [
