@@ -25,7 +25,11 @@
               @click="addToListFromDb(show, listToWatchId)"
               ><v-icon icon="mdi-eye-off"
             /></a>
-            <a href="javascript:void(0)" title='Add to the list "On Hold"' @click="addToListFromDb(show, listOnHoldId)">
+            <a
+              href="javascript:void(0)"
+              title='Add to the list "On Hold"'
+              @click="addToListFromDb(show, listOnHoldId)"
+            >
               <v-icon icon="mdi-pause-circle" />
             </a>
           </div>
